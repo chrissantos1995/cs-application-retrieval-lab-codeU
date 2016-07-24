@@ -6,8 +6,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import redis.clients.jedis.Jedis;
 
@@ -60,8 +62,25 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch or(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+        
+        Set<String> thisUrlSet = this.urlSet();
+        Set<String> thatUrlSet = that.urlSet();
+
+        Map<String,Integer> newMap = new HashMap<>();
+
+        for(String url : thisUrlSet) {
+
+        	Integer newRelevance = this.getRelevance(url) + that.getRelevance(url);
+
+    		newMap.put(url,newRelevance);
+        }
+
+        for(String url : thatUrlSet) {
+        	if(!newMap.containsKey(url))
+        		newMap.put(url, that.getRelevance(url));
+        }
+
+		return new WikiSearch(newMap);
 	}
 	
 	/**
@@ -71,8 +90,23 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch and(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+
+        Set<String> thisUrlSet = this.urlSet();
+        Set<String> thatUrlSet = that.urlSet();
+
+        Map<String,Integer> newMap = new HashMap<>();
+
+        for(String url : thisUrlSet) {
+        	
+        	if(thatUrlSet.contains(url)) {
+
+        		Integer newRelevance = this.getRelevance(url) + that.getRelevance(url);
+
+        		newMap.put(url, newRelevance);
+        	}
+        }
+
+		return new WikiSearch(newMap);
 	}
 	
 	/**
@@ -82,8 +116,23 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch minus(WikiSearch that) {
-        // FILL THIS IN!
-		return null;
+
+        Set<String> thisUrlSet = this.urlSet();
+        Set<String> thatUrlSet = that.urlSet();
+
+        Map<String,Integer> newMap = new HashMap<>();
+
+        for(String url : thisUrlSet) {
+        	
+        	if(!thatUrlSet.contains(url)) {
+
+        		Integer newRelevance = this.getRelevance(url) + that.getRelevance(url);
+        		
+        		newMap.put(url, newRelevance);
+        	}
+        }
+
+		return new WikiSearch(newMap);
 	}
 	
 	/**
@@ -104,8 +153,21 @@ public class WikiSearch {
 	 * @return List of entries with URL and relevance.
 	 */
 	public List<Entry<String, Integer>> sort() {
-        // FILL THIS IN!
-		return null;
+        
+        List<Entry<String,Integer>> list = new ArrayList(map.entrySet());
+
+        list.sort((e1, e2) -> e1.getValue() - e2.getValue());
+
+		return list;
+	}
+
+	/**
+	 * Returns set of URLs in the WikiSearch object
+	 *
+	 * @return Set of URL keys
+	 */
+	public Set<String> urlSet() {
+		return map.keySet();
 	}
 
 	/**
